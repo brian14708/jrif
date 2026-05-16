@@ -1,0 +1,10 @@
+[project]
+site_name = "JRIF"
+site_description = "JSON Range Index Format — sidecar index for partial JSON loading."
+docs_dir = "docs"
+site_dir = "site"
+
+nav = [
+  { "Home" = "index.md" },
+  { "Specification" = "spec.md" },
+]

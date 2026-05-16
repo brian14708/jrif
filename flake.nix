@@ -27,8 +27,10 @@
         }:
         {
           devShells.default = pkgs.mkShell {
+            packages = with pkgs; [ zensical ];
           };
           treefmt.programs = {
+            actionlint.enable = true;
             prettier.enable = true;
             nixfmt.enable = true;
           };

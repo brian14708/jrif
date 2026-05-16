@@ -51,6 +51,7 @@
             with pkgs;
             mkShell {
               packages = [
+                go
                 zensical
                 rustToolchain
               ];
@@ -61,6 +62,7 @@
             programs = {
               actionlint.enable = true;
               prettier.enable = true;
+              gofumpt.enable = true;
               nixfmt.enable = true;
               rustfmt = {
                 enable = true;

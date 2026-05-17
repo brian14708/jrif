@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JSON Range Index v0",
+  "description": "Sidecar index for partially loading large JSON documents via ranged GET.",
+  "type": "object",
+  "required": ["jrif", "root"],
+  "additionalProperties": false,
+  "properties": {
+    "jrif": { "const": "v0" },
+    "meta": {
+      "type": "object",
+      "description": "OPTIONAL record-keeping metadata about the indexed payload (e.g. original byte size, sha256 digest). Free-form: readers MUST NOT use values under meta to drive range decoding or member resolution."
+    },
+    "keys": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Document-level key dictionary. REQUIRED whenever any fields chunk (k=\"fs\") or field chunk (k=\"f\") exists in the document; every chunk's key indices are offsets into this array."
+    },
+    "root": { "$ref": "#/$defs/Value" }
+  },
+  "$defs": {
+    "Range": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "integer", "minimum": 1 }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "InlineValue": {
+      "type": "object",
+      "required": ["t", "v"],
+      "additionalProperties": false,
+      "properties": {
+        "t": { "const": "v" },
+        "v": {}
+      }
+    },
+    "RangedString": {
+      "type": "object",
+      "required": ["t", "r"],
+      "additionalProperties": false,
+      "properties": {
+        "t": { "const": "s" },
+        "r": { "$ref": "#/$defs/Range" }
+      }
+    },
+    "RangedArray": {
+      "type": "object",
+      "required": ["t", "r"],
+      "additionalProperties": false,
+      "properties": {
+        "t": { "const": "a" },
+        "r": { "$ref": "#/$defs/Range" },
+        "c": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ArrayChunk" }
+        }
+      }
+    },
+    "RangedObject": {
+      "type": "object",
+      "required": ["t", "r"],
+      "additionalProperties": false,
+      "properties": {
+        "t": { "const": "o" },
+        "r": { "$ref": "#/$defs/Range" },
+        "c": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ObjectChunk" }
+        }
+      }
+    },
+    "Value": {
+      "oneOf": [
+        { "$ref": "#/$defs/InlineValue" },
+        { "$ref": "#/$defs/RangedString" },
+        { "$ref": "#/$defs/RangedArray" },
+        { "$ref": "#/$defs/RangedObject" }
+      ]
+    },
+    "ItemsChunk": {
+      "type": "object",
+      "required": ["k", "n", "r"],
+      "additionalProperties": false,
+      "properties": {
+        "k": { "const": "is" },
+        "n": { "type": "integer", "minimum": 1 },
+        "r": { "$ref": "#/$defs/Range" }
+      }
+    },
+    "ItemInline": {
+      "type": "object",
+      "required": ["k", "t", "v"],
+      "additionalProperties": false,
+      "properties": {
+        "k": { "const": "i" },
+        "t": { "const": "v" },
+        "v": {}
+      }
+    },
+    "ItemRangedString": {
+      "type": "object",
+      "required": ["k", "t", "r"],
+      "additionalProperties": false,
+      "properties": {
+        "k": { "const": "i" },
+        "t": { "const": "s" },
+        "r": { "$ref": "#/$defs/Range" }
+      }
+    },
+    "ItemRangedArray": {
+      "type": "object",
+      "required": ["k", "t", "r"],
+      "additionalProperties": false,
+      "properties": {
+        "k": { "const": "i" },
+        "t": { "const": "a" },
+        "r": { "$ref": "#/$defs/Range" },
+        "c": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ArrayChunk" }
+        }
+      }
+    },
+    "ItemRangedObject": {
+      "type": "object",
+      "required": ["k", "t", "r"],
+      "additionalProperties": false,
+      "properties": {
+        "k": { "const": "i" },
+        "t": { "const": "o" },
+        "r": { "$ref": "#/$defs/Range" },
+        "c": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ObjectChunk" }
+        }
+      }
+    },
+    "ArrayChunk": {
+      "oneOf": [
+        { "$ref": "#/$defs/ItemsChunk" },
+        { "$ref": "#/$defs/ItemInline" },
+        { "$ref": "#/$defs/ItemRangedString" },
+        { "$ref": "#/$defs/ItemRangedArray" },
+        { "$ref": "#/$defs/ItemRangedObject" }
+      ]
+    },
+    "FieldsChunk": {
+      "type": "object",
+      "required": ["k", "f", "r"],
+      "additionalProperties": false,
+      "properties": {
+        "k": { "const": "fs" },
+        "f": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0 },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "r": { "$ref": "#/$defs/Range" }
+      }
+    },
+    "FieldInline": {
+      "type": "object",
+      "required": ["k", "n", "t", "v"],
+      "additionalProperties": false,
+      "properties": {
+        "k": { "const": "f" },
+        "n": { "type": "integer", "minimum": 0 },
+        "t": { "const": "v" },
+        "v": {}
+      }
+    },
+    "FieldRangedString": {
+      "type": "object",
+      "required": ["k", "n", "t", "r"],
+      "additionalProperties": false,
+      "properties": {
+        "k": { "const": "f" },
+        "n": { "type": "integer", "minimum": 0 },
+        "t": { "const": "s" },
+        "r": { "$ref": "#/$defs/Range" }
+      }
+    },
+    "FieldRangedArray": {
+      "type": "object",
+      "required": ["k", "n", "t", "r"],
+      "additionalProperties": false,
+      "properties": {
+        "k": { "const": "f" },
+        "n": { "type": "integer", "minimum": 0 },
+        "t": { "const": "a" },
+        "r": { "$ref": "#/$defs/Range" },
+        "c": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ArrayChunk" }
+        }
+      }
+    },
+    "FieldRangedObject": {
+      "type": "object",
+      "required": ["k", "n", "t", "r"],
+      "additionalProperties": false,
+      "properties": {
+        "k": { "const": "f" },
+        "n": { "type": "integer", "minimum": 0 },
+        "t": { "const": "o" },
+        "r": { "$ref": "#/$defs/Range" },
+        "c": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ObjectChunk" }
+        }
+      }
+    },
+    "ObjectChunk": {
+      "oneOf": [
+        { "$ref": "#/$defs/FieldsChunk" },
+        { "$ref": "#/$defs/FieldInline" },
+        { "$ref": "#/$defs/FieldRangedString" },
+        { "$ref": "#/$defs/FieldRangedArray" },
+        { "$ref": "#/$defs/FieldRangedObject" }
+      ]
+    }
+  }
+}

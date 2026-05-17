@@ -9,8 +9,8 @@ JSON; the `.jrif` file lives alongside it and carries the index.
 
 ## Where to go next
 
-- **[Specification](spec.md)** — the normative format spec for JRIF v1.
-- **[JSON Schema (v1)](v1/schema.json)** — machine-readable schema for `.jrif`
+- **[Specification](spec.md)** — the normative format spec for JRIF v0.
+- **[JSON Schema (v0)](v0/schema.json)** — machine-readable schema for `.jrif`
   files.
 
 ## Status

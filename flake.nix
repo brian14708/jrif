@@ -54,6 +54,7 @@
                 go
                 zensical
                 rustToolchain
+                uv
               ];
             };
 
@@ -64,6 +65,8 @@
               prettier.enable = true;
               gofumpt.enable = true;
               nixfmt.enable = true;
+              ruff-check.enable = true;
+              ruff-format.enable = true;
               rustfmt = {
                 enable = true;
                 package = rustToolchain;
